@@ -34,17 +34,15 @@ public class PaymentServiceImpl implements PaymentService {
         validateAmount(amount);
         validateUserExists(userId);
 
-        // Create or retrieve wallet
         Wallet wallet = getOrCreateWallet(userId);
 
-        // Create payment record
         Payment payment = new Payment(
-                null, // No sender for top-up
+                null,
                 userId,
                 amount,
                 TransactionType.TOPUP,
                 PaymentStatus.SUCCESS,
-                null, // No room associated
+                null,
                 "Top-up balance"
         );
 
