@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papikos - Riwayat Transaksi</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .card {
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: none;
+        }
+
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 0.75rem 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #4262c5;
+            border-color: #3d5cb8;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .balance-card {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 0.25rem solid #224abe;
+        }
+
+        .balance-card .h2 {
+            font-weight: 700;
+        }
+
+        .balance-card .text-xs {
+            font-size: 0.7rem;
+            letter-spacing: 0.1rem;
+            text-transform: uppercase;
+        }
+
+        .transaction-topup {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .transaction-payment {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .transaction-topup .transaction-icon {
+            background-color: rgba(28, 200, 138, 0.1);
+            color: var(--success-color);
+        }
+
+        .transaction-payment .transaction-icon {
+            background-color: rgba(78, 115, 223, 0.1);
+            color: var(--primary-color);
+        }
+
+        .text-success {
+            color: var(--success-color) !important;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .text-danger {
+            color: var(--danger-color) !important;
+        }
+
+        .action-buttons {
+            gap: 10px;
+        }
+
+        .filter-form {
+            background-color: #fff;
+            border-radius: 0.35rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+
+        .badge-topup {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .badge-payment {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Add animation for new transactions */
+        @keyframes highlightNew {
+            from { background-color: rgba(78, 115, 223, 0.1); }
+            to { background-color: transparent; }
+        }
+
+        .transaction-new {
+            animation: highlightNew 2s ease-out;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <!-- Alert for success or error messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2 balance-card">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs mb-1">SALDO SAAT INI</div>
+                                    <div class="h2 mb-0 font-weight-bold" th:text="'Rp ' + ${balance}"></div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-wallet fa-2x text-white-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-8 col-md-6 mb-4">
+                    <div class="d-flex justify-content-end h-100 align-items-center action-buttons">
+                        <a th:href="@{/payment/topup}" class="btn btn-success">
+                            <i class="fas fa-plus-circle me-1"></i> Top Up
+                        </a>
+                        <a th:href="@{/payment/pay}" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i> Bayar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Form -->
+            <div class="filter-form mb-4">
+                <form th:action="@{/payment/transactions}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="startDate" class="form-label">Tanggal Mulai</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate" th:value="${startDate}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="endDate" class="form-label">Tanggal Akhir</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" th:value="${endDate}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="transactionType" class="form-label">Jenis Transaksi</label>
+                        <select class="form-select" id="transactionType" name="transactionType">
+                            <option value="">Semua Transaksi</option>
+                            <option th:each="type : ${transactionTypes}"
+                                    th:value="${type}"
+                                    th:text="${type == T(id.ac.ui.cs.advprog.papikos.payment.model.TransactionType).TOPUP ? 'Top Up' : 'Pembayaran'}"
+                                    th:selected="${type == transactionType}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                        <a th:href="@{/payment/transactions}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-undo me-1"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Transaction List -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">Riwayat Transaksi</h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${transactions.empty}" class="text-center py-5">
+                        <i class="fas fa-receipt fa-3x text-gray-300 mb-3"></i>
+                        <p class="mb-0">Belum ada transaksi</p>
+                    </div>
+
+                    <div th:unless="${transactions.empty}">
+                        <div class="transaction-list">
+                            <div th:each="transaction : ${transactions}" th:class="${transaction.type.name() == 'TOPUP' ? 'transaction-topup' : 'transaction-payment'}" class="card mb-3">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="transaction-icon me-3">
+                                        <i th:class="${transaction.type.name() == 'TOPUP' ? 'fas fa-arrow-down' : 'fas fa-arrow-up'}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <div>
+                                                <span class="badge" th:classappend="${transaction.type.name() == 'TOPUP' ? 'badge-topup' : 'badge-payment'}" th:text="${transaction.type.name() == 'TOPUP' ? 'Top Up' : 'Pembayaran'}"></span>
+                                                <span class="ms-2 text-secondary" th:text="${#temporals.format(transaction.timestamp, 'dd MMM yyyy, HH:mm')}"></span>
+                                            </div>
+                                            <div th:if="${transaction.type.name() == 'TOPUP'}" class="h5 mb-0 text-success">
+                                                + Rp <span th:text="${transaction.amount}"></span>
+                                            </div>
+                                            <div th:if="${transaction.type.name() == 'PAYMENT'}" class="h5 mb-0 text-danger">
+                                                - Rp <span th:text="${transaction.amount}"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-secondary" th:text="${transaction.description}">
+                                            Deskripsi transaksi
+                                        </div>
+                                        <div class="small text-muted">
+                                            ID: <span th:text="${transaction.id}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    });
+</script>
+</body>
+</html>

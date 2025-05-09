@@ -3,36 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Papikos - Top Up Saldo">
     <title>Papikos - Top Up</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #4e73df;
+            --primary-hover: #3d5ebc;
             --secondary-color: #858796;
             --success-color: #1cc88a;
             --info-color: #36b9cc;
             --warning-color: #f6c23e;
             --danger-color: #e74a3b;
+            --light-gray: #f8f9fc;
+            --border-color: #e3e6f0;
         }
 
         body {
-            background-color: #f8f9fc;
+            background-color: var(--light-gray);
             font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .card {
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: 0.75rem;
+            box-shadow: 0 0.25rem 1rem rgba(58, 59, 69, 0.15);
             border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .card-header {
-            background-color: #f8f9fc;
-            border-bottom: 1px solid #e3e6f0;
-            padding: 0.75rem 1.25rem;
+            background-color: var(--light-gray);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
             font-weight: 700;
             color: var(--primary-color);
+            border-top-left-radius: 0.75rem !important;
+            border-top-right-radius: 0.75rem !important;
         }
 
         .btn-primary {
@@ -41,33 +51,141 @@
         }
 
         .btn-primary:hover {
-            background-color: #4262c5;
-            border-color: #3d5cb8;
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
         }
 
         .balance-card {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
             color: white;
             border-left: 0.25rem solid #224abe;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
         }
 
         .balance-card .h2 {
             font-weight: 700;
+            position: relative;
+            z-index: 1;
         }
 
         .balance-card .text-xs {
             font-size: 0.7rem;
             letter-spacing: 0.1rem;
             text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-card .icon-container {
+            position: relative;
+            z-index: 1;
         }
 
         .amount-options .btn {
             width: 100%;
             margin-bottom: 10px;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .amount-options .btn.active {
+            transform: scale(0.98);
         }
 
         .custom-amount {
             margin-top: 20px;
+        }
+
+        .input-group {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .input-group-text {
+            background-color: var(--light-gray);
+            border-color: var(--border-color);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+
+        .payment-method-container {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-method-option {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .payment-method-option.active {
+            background-color: rgba(78, 115, 223, 0.1);
+        }
+
+        .payment-method-option .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .alert {
+            border-radius: 0.5rem;
+            border: none;
+        }
+
+        /* Focus styles for accessibility */
+        :focus-visible {
+            outline: 3px solid rgba(78, 115, 223, 0.5);
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Animation for success */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
         }
     </style>
 </head>
@@ -76,25 +194,27 @@
     <div class="row justify-content-center">
         <div class="col-xl-10 col-lg-12 col-md-9">
             <!-- Alert for success or error messages -->
-            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show fade-in" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
                 <span th:text="${success}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show fade-in" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
                 <span th:text="${error}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
             <div class="row">
                 <div class="col-xl-4 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2 balance-card">
+                    <div class="card shadow h-100 py-2 balance-card">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs mb-1">SALDO SAAT INI</div>
                                     <div class="h2 mb-0 font-weight-bold" th:text="'Rp ' + ${balance}"></div>
                                 </div>
-                                <div class="col-auto">
+                                <div class="col-auto icon-container">
                                     <i class="fas fa-wallet fa-2x text-white-300"></i>
                                 </div>
                             </div>
@@ -108,67 +228,84 @@
                     <h6 class="m-0 font-weight-bold">Top Up Saldo</h6>
                 </div>
                 <div class="card-body">
-                    <form th:action="@{/payment/topup}" method="post">
+                    <form id="topupForm" th:action="@{/payment/topup}" method="post" novalidate>
                         <input type="hidden" name="userId" th:value="${userId}">
+                        <input type="hidden" name="redirectToWallet" value="true">
 
                         <div class="mb-4">
-                            <label class="form-label">Pilih Jumlah</label>
+                            <label class="form-label fw-bold">Pilih Jumlah</label>
                             <div class="row amount-options">
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="50000">Rp 50.000</button>
+                                <div class="col-md-4 col-6">
+                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="50000" aria-label="Top Up Rp 50.000">Rp 50.000</button>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="100000">Rp 100.000</button>
+                                <div class="col-md-4 col-6">
+                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="100000" aria-label="Top Up Rp 100.000">Rp 100.000</button>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="200000">Rp 200.000</button>
+                                <div class="col-md-4 col-6">
+                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="200000" aria-label="Top Up Rp 200.000">Rp 200.000</button>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="500000">Rp 500.000</button>
+                                <div class="col-md-4 col-6">
+                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="500000" aria-label="Top Up Rp 500.000">Rp 500.000</button>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="1000000">Rp 1.000.000</button>
+                                <div class="col-md-4 col-6">
+                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="1000000" aria-label="Top Up Rp 1.000.000">Rp 1.000.000</button>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="2000000">Rp 2.000.000</button>
+                                <div class="col-md-4 col-6">
+                                    <button type="button" class="btn btn-outline-primary amount-btn" data-amount="2000000" aria-label="Top Up Rp 2.000.000">Rp 2.000.000</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3 custom-amount">
-                            <label for="amount" class="form-label">Atau Masukkan Jumlah Khusus</label>
+                        <div class="mb-4 custom-amount">
+                            <label for="amount" class="form-label fw-bold">Atau Masukkan Jumlah Khusus</label>
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control" id="amount" name="amount" min="10000" step="10000" required>
+                                <input type="number" class="form-control" id="amount" name="amount" min="10000" step="1000" required aria-describedby="amountHelp">
                             </div>
-                            <div class="form-text">Minimum top up: Rp 10.000</div>
+                            <div id="amountHelp" class="form-text">Minimum top up: Rp 10.000</div>
+                            <div class="invalid-feedback">Jumlah harus minimal Rp 10.000</div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Metode Pembayaran</label>
-                            <div class="mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="transfer" value="transfer" checked>
-                                    <label class="form-check-label" for="transfer">
-                                        Transfer Bank
-                                    </label>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">Metode Pembayaran</label>
+                            <div class="payment-method-container">
+                                <div class="payment-method-option mb-3" data-method="transfer">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="transfer" value="transfer" checked>
+                                        <label class="form-check-label d-flex align-items-center" for="transfer">
+                                            <i class="fas fa-university me-2 text-primary"></i>
+                                            <div>
+                                                <strong>Transfer Bank</strong>
+                                                <div class="text-muted small">BCA, Mandiri, BNI, BRI</div>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="ewallet" value="ewallet">
-                                    <label class="form-check-label" for="ewallet">
-                                        E-Wallet
-                                    </label>
+                                <div class="payment-method-option" data-method="ewallet">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="ewallet" value="ewallet">
+                                        <label class="form-check-label d-flex align-items-center" for="ewallet">
+                                            <i class="fas fa-wallet me-2 text-primary"></i>
+                                            <div>
+                                                <strong>E-Wallet</strong>
+                                                <div class="text-muted small">DANA, OVO, GoPay, ShopeePay</div>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">Top Up Sekarang</button>
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+                                <span id="submitText">Top Up Sekarang</span>
+                                <span id="loadingSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                            </button>
                         </div>
 
-                        <div class="mt-3 text-center">
-                            <a th:href="@{/payment/transactions}" class="text-decoration-none">
-                                <i class="fas fa-arrow-left me-1"></i> Kembali ke Riwayat Transaksi
+                        <div class="mt-4 text-center">
+                            <a th:href="@{/payment/transactions}" class="text-decoration-none d-inline-flex align-items-center">
+                                <i class="fas fa-arrow-left me-2"></i> Kembali ke Riwayat Transaksi
                             </a>
                         </div>
                     </form>
@@ -184,7 +321,18 @@
         // Handle amount button clicks
         const amountBtns = document.querySelectorAll('.amount-btn');
         const amountInput = document.getElementById('amount');
+        const form = document.getElementById('topupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const paymentOptions = document.querySelectorAll('.payment-method-option');
 
+        // Format number to Indonesian currency format
+        function formatCurrency(number) {
+            return new Intl.NumberFormat('id-ID').format(number);
+        }
+
+        // Handle amount button clicks
         amountBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 // Remove active class from all buttons
@@ -197,8 +345,86 @@
 
                 // Set amount value
                 amountInput.value = this.dataset.amount;
+
+                // Validate input
+                validateAmount();
             });
         });
+
+        // Format amount input on blur
+        amountInput.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value)) {
+                // Don't change the actual value, just display formatted
+                const formattedVal = formatCurrency(this.value);
+                // Could add visual formatted display here if needed
+            }
+        });
+
+        // Validate amount input
+        function validateAmount() {
+            const value = parseInt(amountInput.value);
+            if (isNaN(value) || value < 10000) {
+                amountInput.classList.add('is-invalid');
+                return false;
+            } else {
+                amountInput.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        // Input validation
+        amountInput.addEventListener('input', validateAmount);
+
+        // Handle payment method selection
+        paymentOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const radioInput = this.querySelector('input[type="radio"]');
+                radioInput.checked = true;
+
+                // Update active class
+                paymentOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!validateAmount()) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitText.textContent = 'Memproses...';
+            loadingSpinner.classList.remove('d-none');
+
+            // Store the amount in session storage for display in wallet page
+            const amount = parseInt(amountInput.value);
+            if (!isNaN(amount)) {
+                sessionStorage.setItem('topupAmount', amount);
+                sessionStorage.setItem('topupSuccess', 'true');
+                sessionStorage.setItem('topupTime', new Date().toISOString());
+            }
+
+            // Form is valid, submit will continue
+            // Server-side will redirect to wallet.html after processing
+            return true;
+        });
+
+        // Initialize the page
+        // Check if default value was already selected
+        if (amountInput.value) {
+            // Find button matching the amount and click it
+            const matchingBtn = Array.from(amountBtns).find(btn => btn.dataset.amount === amountInput.value);
+            if (matchingBtn) {
+                matchingBtn.click();
+            }
+        }
+
+        // Initialize payment method selection
+        const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        document.querySelector(`.payment-method-option[data-method="${selectedMethod}"]`).classList.add('active');
     });
 </script>
 </body>
