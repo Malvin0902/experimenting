@@ -20,24 +20,16 @@ import java.util.UUID;
 public class Payment {
     @Id
     private UUID id;
-
     private UUID fromUserId;
-
     private UUID toUserId;
-
     @Column(nullable = false)
     private BigDecimal amount;
-
     @Enumerated(EnumType.STRING)
     private TransactionType type;
-
     private LocalDateTime timestamp;
-
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
-
     private UUID roomId;
-
     private String description;
 
     public Payment(UUID fromUserId, UUID toUserId, BigDecimal amount,

@@ -35,6 +35,12 @@ public class PaymentController {
             return "redirect:/api/auth/login";
         }
 
+        // Add role check - only tenants can top up
+        if (user.getRole() != Role.PENYEWA) {
+            ra.addFlashAttribute("error", "Hanya penyewa yang dapat melakukan top-up");
+            return "redirect:/";
+        }
+
         BigDecimal balance = paymentService.getBalance(user.getId());
         model.addAttribute("balance", balance);
         model.addAttribute("userId", user.getId());
@@ -53,6 +59,12 @@ public class PaymentController {
         if (user == null) {
             ra.addFlashAttribute("error", "Silakan login terlebih dahulu");
             return "redirect:/api/auth/login";
+        }
+
+        // Add role check - only tenants can top up
+        if (user.getRole() != Role.PENYEWA) {
+            ra.addFlashAttribute("error", "Hanya penyewa yang dapat melakukan top-up");
+            return "redirect:/";
         }
 
         // Ensure user can only top-up their own account
@@ -112,6 +124,12 @@ public class PaymentController {
         if (user == null) {
             ra.addFlashAttribute("error", "Silakan login terlebih dahulu");
             return "redirect:/api/auth/login";
+        }
+
+        // Add role check - only tenants can make payments
+        if (user.getRole() != Role.PENYEWA) {
+            ra.addFlashAttribute("error", "Hanya penyewa yang dapat melakukan pembayaran");
+            return "redirect:/";
         }
 
         // Ensure user can only make payments from their own account
